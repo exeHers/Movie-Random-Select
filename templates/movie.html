@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}{{ m.title }} — Movie Night{% endblock %}
+{% block body %}
+<header>
+  <p class="sub" style="margin:0 0 0.25rem;"><a href="/">&larr; Home</a></p>
+  <h1>{{ m.title }}{% if m.release_date %} <span class="pill">{{ m.release_date[:4] }}</span>{% endif %}</h1>
+  {% if m.tagline %}<p class="sub" style="font-style: italic;">{{ m.tagline }}</p>{% endif %}
+</header>
+
+<div class="card" style="display: grid; gap: 1rem; grid-template-columns: 1fr; align-items: start;">
+  {% if m.poster_path %}
+    <img
+      src="https://image.tmdb.org/t/p/w342{{ m.poster_path }}"
+      alt=""
+      width="342"
+      style="max-width: 100%; border-radius: 8px; border: 1px solid var(--border);"
+    />
+  {% endif %}
+  <div>
+    {% if m.vote_average %}
+      <p class="sub" style="margin:0 0 0.5rem;">TMDB score: <strong>{{ "%.1f"|format(m.vote_average) }}</strong> / 10</p>
+    {% endif %}
+    <p style="margin:0;">{{ m.overview or "No overview." }}</p>
+    {% if m.genres %}
+      <p class="sub" style="margin: 1rem 0 0;">
+        {% for g in m.genres %}{{ g.name }}{% if not loop.last %}, {% endif %}{% endfor %}
+      </p>
+    {% endif %}
+  </div>
+</div>
+
+<div class="actions">
+  {% if seen %}
+    <form method="post" action="/unseen/{{ m.id }}">
+      <button type="submit" class="secondary">Mark as not seen</button>
+    </form>
+  {% else %}
+    <form method="post" action="/seen/{{ m.id }}">
+      <button type="submit">Mark as seen</button>
+    </form>
+  {% endif %}
+  <a class="btn secondary" href="/" style="display:inline-block; text-decoration:none; line-height:1.2;">Pick again</a>
+</div>
+<p class="sub" style="margin-top:1.5rem;">Data from <a href="https://www.themoviedb.org/" rel="noopener">TMDB</a>.</p>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block body %}
+<header>
+  <h1>Movie night</h1>
+  <p class="sub">Pick who is watching — we blend tastes, skip what you have already seen, and pick one title.</p>
+</header>
+
+{% if request.query_params.get('err') == 'no_audience' %}
+  <p class="err">Choose at least one group.</p>
+{% elif request.query_params.get('err') == 'no_movies' %}
+  <p class="err">No unseen matches right now. Try again (random page) or clear some &ldquo;seen&rdquo; entries.</p>
+{% elif request.query_params.get('err') == 'bad_audience' %}
+  <p class="err">Something went wrong with the selection.</p>
+{% endif %}
+
+<div class="card">
+  <form method="post" action="/suggest">
+    <p style="margin:0 0 0.75rem; color: var(--muted); font-size: 0.9rem;">Who is watching?</p>
+    <div class="row">
+      {% for p in profiles %}
+        <label>
+          <input type="checkbox" name="audience" value="{{ p.slug }}" />
+          {{ p.display_name }}
+        </label>
+      {% endfor %}
+    </div>
+    <div class="actions">
+      <button type="submit">Suggest a movie</button>
+    </div>
+  </form>
+</div>
+
+<div class="card">
+  <p style="margin:0 0 0.5rem; font-weight: 600;">Seen <span class="pill">{{ seen_total }} total</span></p>
+  <p class="sub" style="margin:0 0 0.75rem;">These are excluded from suggestions.</p>
+  {% if seen_movies %}
+    <ul class="seen">
+      {% for s in seen_movies %}
+        <li>{{ s.title }}</li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="sub" style="margin:0;">Nothing marked yet — use the button on a movie page after you watch it.</p>
+  {% endif %}
+</div>
+{% endblock %}
