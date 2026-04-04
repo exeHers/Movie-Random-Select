@@ -50,3 +50,13 @@ async def movie_detail(tmdb_id: int) -> dict[str, Any]:
         )
         r.raise_for_status()
         return r.json()
+
+
+async def movie_videos(tmdb_id: int) -> dict[str, Any]:
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        r = await client.get(
+            f"{BASE}/movie/{tmdb_id}/videos",
+            params={"api_key": _api_key(), "language": "en-US"},
+        )
+        r.raise_for_status()
+        return r.json()

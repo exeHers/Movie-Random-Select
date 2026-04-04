@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Tastes — Movie Night{% endblock %}
+{% block body %}
+<header>
+  <h1>Tastes</h1>
+  <p class="sub">Tune genres and quality per person. Use comma-separated <a href="https://developer.themoviedb.org/reference/genre-movie-list" rel="noopener">TMDB genre IDs</a>. Rotation order (0, 1, 2) is only for stepdad, mom, and you.</p>
+</header>
+
+{% for p in profiles %}
+  <div class="card stack">
+    <h2 style="margin:0;">{{ p.display_name }} <span class="pill">{{ p.slug }}</span></h2>
+    <form method="post" action="/profiles/{{ p.id }}" class="stack">
+      <label class="sub" for="dn_{{ p.id }}">Display name</label>
+      <input id="dn_{{ p.id }}" type="text" name="display_name" value="{{ p.display_name }}" maxlength="128" required />
+
+      <label class="sub" for="g_{{ p.id }}">Genre IDs</label>
+      <input id="g_{{ p.id }}" type="text" name="genre_ids" value="{{ p.genre_ids }}" placeholder="e.g. 18,36" />
+
+      <div class="btn-row">
+        <div>
+          <label class="sub" for="va_{{ p.id }}">Min TMDB score</label>
+          <input id="va_{{ p.id }}" type="number" name="min_vote_average" value="{{ p.min_vote_average }}" step="0.1" min="0" max="10" required />
+        </div>
+        <div>
+          <label class="sub" for="vc_{{ p.id }}">Min votes</label>
+          <input id="vc_{{ p.id }}" type="number" name="min_vote_count" value="{{ p.min_vote_count }}" step="50" min="0" required />
+        </div>
+      </div>
+
+      <label class="sub" for="ro_{{ p.id }}">Rotation order (blank = not in nightly rotation)</label>
+      <input id="ro_{{ p.id }}" type="text" name="rotation_order" value="{{ p.rotation_order if p.rotation_order is not none else '' }}" inputmode="numeric" placeholder="0, 1, 2 …" />
+
+      <label class="sub" for="ex_{{ p.id }}">Skip titles containing (comma-separated)</label>
+      <textarea id="ex_{{ p.id }}" name="exclude_keywords" placeholder="horror, zombie">{{ p.exclude_keywords or '' }}</textarea>
+
+      <button type="submit" class="secondary">Save {{ p.display_name }}</button>
+    </form>
+  </div>
+{% endfor %}
+{% endblock %}

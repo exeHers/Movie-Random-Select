@@ -2,21 +2,53 @@
 {% block body %}
 <header>
   <h1>Movie night</h1>
-  <p class="sub">Pick who is watching — we blend tastes, skip what you have already seen, and pick one title.</p>
+  <p class="sub">Whose pick tonight rotates: stepdad → mom → you. Tap the big button for a pick that matches that person&rsquo;s taste (and skips what you&rsquo;ve already seen).</p>
 </header>
 
-{% if request.query_params.get('err') == 'no_audience' %}
-  <p class="err">Choose at least one group.</p>
-{% elif request.query_params.get('err') == 'no_movies' %}
-  <p class="err">No unseen matches right now. Try again (random page) or clear some &ldquo;seen&rdquo; entries.</p>
-{% elif request.query_params.get('err') == 'bad_audience' %}
+{% set err = request.query_params.get('err') %}
+{% if err == 'no_audience' %}
+  <p class="err">Choose at least one person for a blended pick.</p>
+{% elif err == 'no_movies' %}
+  <p class="err">No unseen matches right now. Try again, loosen tastes in Tastes, or clear some seen titles.</p>
+{% elif err == 'bad_audience' %}
   <p class="err">Something went wrong with the selection.</p>
+{% elif err == 'no_rotation' %}
+  <p class="err">Rotation profiles are missing. Open Tastes and save once.</p>
+{% elif err == 'watchlist_empty' %}
+  <p class="err">Watchlist is empty or everything on it is already seen.</p>
 {% endif %}
 
-<div class="card">
+<div class="card stack">
+  <div>
+    <p style="margin:0 0 0.35rem; font-size:0.8rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.06em;">Tonight&rsquo;s turn</p>
+    {% if tonight %}
+      <p style="margin:0; font-size:1.35rem; font-weight:700;">{{ tonight.display_name }} <span class="pill live">Pick</span></p>
+      {% if next_picker %}
+        <p class="hint">Next up: {{ next_picker.display_name }}</p>
+      {% endif %}
+    {% else %}
+      <p class="sub" style="margin:0;">Add rotation profiles under Tastes.</p>
+    {% endif %}
+  </div>
+  <form method="post" action="/tonight">
+    <button type="submit" {% if not tonight %}disabled{% endif %}>Suggest for tonight</button>
+  </form>
+  <details style="margin:0;">
+    <summary class="sub" style="cursor:pointer; font-size:0.88rem;">Sync the calendar</summary>
+    <p class="hint">If &ldquo;tonight&rdquo; is wrong, set which calendar day counts as night 1 (stepdad). The app cycles from that date.</p>
+    <form method="post" action="/rotation/anchor" class="stack" style="margin-top:0.5rem;">
+      <label class="sub" for="anchor_date">Rotation start date</label>
+      <input id="anchor_date" type="date" name="anchor_date" value="{{ anchor_date or '' }}" required />
+      <button type="submit" class="secondary">Save start date</button>
+    </form>
+  </details>
+</div>
+
+<div class="card stack">
+  <h2>Everyone&rsquo;s here</h2>
+  <p class="sub" style="margin:0;">Blend tastes when you all watch together.</p>
   <form method="post" action="/suggest">
-    <p style="margin:0 0 0.75rem; color: var(--muted); font-size: 0.9rem;">Who is watching?</p>
-    <div class="row">
+    <div class="row" style="margin-bottom:0.5rem;">
       {% for p in profiles %}
         <label>
           <input type="checkbox" name="audience" value="{{ p.slug }}" />
@@ -24,23 +56,38 @@
         </label>
       {% endfor %}
     </div>
-    <div class="actions">
-      <button type="submit">Suggest a movie</button>
-    </div>
+    <button type="submit" class="secondary">Blended suggestion</button>
   </form>
 </div>
 
+<div class="card stack">
+  <h2>Watchlist</h2>
+  <p class="sub" style="margin:0;">Save trailers you want to come back to. Tonight&rsquo;s picker sometimes pulls from here.</p>
+  {% if watchlist %}
+    <ul class="compact">
+      {% for w in watchlist %}
+        <li><a href="/movie/{{ w.tmdb_id }}?from=watchlist">{{ w.title }}</a></li>
+      {% endfor %}
+    </ul>
+    <form method="post" action="/suggest/watchlist">
+      <button type="submit" class="ghost">Random from watchlist</button>
+    </form>
+  {% else %}
+    <p class="sub" style="margin:0;">Nothing saved yet &mdash; use &ldquo;Save to watchlist&rdquo; on a movie.</p>
+  {% endif %}
+</div>
+
 <div class="card">
-  <p style="margin:0 0 0.5rem; font-weight: 600;">Seen <span class="pill">{{ seen_total }} total</span></p>
-  <p class="sub" style="margin:0 0 0.75rem;">These are excluded from suggestions.</p>
+  <h2>Seen <span class="pill">{{ seen_total }}</span></h2>
+  <p class="sub" style="margin:0 0 0.5rem;">Won&rsquo;t be suggested again.</p>
   {% if seen_movies %}
-    <ul class="seen">
+    <ul class="compact">
       {% for s in seen_movies %}
-        <li>{{ s.title }}</li>
+        <li><a href="/movie/{{ s.tmdb_id }}">{{ s.title }}</a></li>
       {% endfor %}
     </ul>
   {% else %}
-    <p class="sub" style="margin:0;">Nothing marked yet — use the button on a movie page after you watch it.</p>
+    <p class="sub" style="margin:0;">Mark seen after you watch.</p>
   {% endif %}
 </div>
 {% endblock %}
