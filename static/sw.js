@@ -1,5 +1,5 @@
-const CACHE = "movie-night-v1";
-const ASSETS = ["/", "/static/manifest.webmanifest", "/static/icon.svg"];
+const CACHE = "movie-night-v2";
+const ASSETS = ["/", "/sync", "/static/manifest.webmanifest", "/static/icon.svg", "/static/app.css"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -21,7 +21,12 @@ self.addEventListener("fetch", (event) => {
   if (req.method !== "GET") return;
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
-  if (url.pathname.startsWith("/movie/") || url.pathname === "/" || url.pathname === "/profiles") {
+  if (
+    url.pathname.startsWith("/movie/") ||
+    url.pathname === "/" ||
+    url.pathname === "/profiles" ||
+    url.pathname === "/sync"
+  ) {
     event.respondWith(
       fetch(req).catch(() => caches.match("/"))
     );

@@ -4,8 +4,8 @@
   "description": "Family movie picks, rotation, and seen list",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0f1115",
-  "theme_color": "#0f1115",
+  "background_color": "#07080c",
+  "theme_color": "#07080c",
   "icons": [
     {
       "src": "/static/icon.svg",

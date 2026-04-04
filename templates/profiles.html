@@ -1,14 +1,14 @@
 {% extends "base.html" %}
 {% block title %}Tastes — Movie Night{% endblock %}
 {% block body %}
-<header>
+<header class="page-head">
   <h1>Tastes</h1>
-  <p class="sub">Tune genres and quality per person. Use comma-separated <a href="https://developer.themoviedb.org/reference/genre-movie-list" rel="noopener">TMDB genre IDs</a>. Rotation order (0, 1, 2) is only for stepdad, mom, and you.</p>
+  <p class="sub">Per-person genres and filters. IDs: <a href="https://developer.themoviedb.org/reference/genre-movie-list" rel="noopener">TMDB genres</a>. Rotation order 0, 1, 2 = stepdad, mom, you.</p>
 </header>
 
 {% for p in profiles %}
   <div class="card stack">
-    <h2 style="margin:0;">{{ p.display_name }} <span class="pill">{{ p.slug }}</span></h2>
+    <h2 style="margin:0; font-family:var(--font-display);">{{ p.display_name }} <span class="pill">{{ p.slug }}</span></h2>
     <form method="post" action="/profiles/{{ p.id }}" class="stack">
       <label class="sub" for="dn_{{ p.id }}">Display name</label>
       <input id="dn_{{ p.id }}" type="text" name="display_name" value="{{ p.display_name }}" maxlength="128" required />
@@ -18,7 +18,7 @@
 
       <div class="btn-row">
         <div>
-          <label class="sub" for="va_{{ p.id }}">Min TMDB score</label>
+          <label class="sub" for="va_{{ p.id }}">Min score</label>
           <input id="va_{{ p.id }}" type="number" name="min_vote_average" value="{{ p.min_vote_average }}" step="0.1" min="0" max="10" required />
         </div>
         <div>
@@ -27,11 +27,11 @@
         </div>
       </div>
 
-      <label class="sub" for="ro_{{ p.id }}">Rotation order (blank = not in nightly rotation)</label>
-      <input id="ro_{{ p.id }}" type="text" name="rotation_order" value="{{ p.rotation_order if p.rotation_order is not none else '' }}" inputmode="numeric" placeholder="0, 1, 2 …" />
+      <label class="sub" for="ro_{{ p.id }}">Rotation order (blank = out of rotation)</label>
+      <input id="ro_{{ p.id }}" type="text" name="rotation_order" value="{{ p.rotation_order if p.rotation_order is not none else '' }}" inputmode="numeric" placeholder="0–2" />
 
-      <label class="sub" for="ex_{{ p.id }}">Skip titles containing (comma-separated)</label>
-      <textarea id="ex_{{ p.id }}" name="exclude_keywords" placeholder="horror, zombie">{{ p.exclude_keywords or '' }}</textarea>
+      <label class="sub" for="ex_{{ p.id }}">Skip if title contains</label>
+      <textarea id="ex_{{ p.id }}" name="exclude_keywords" placeholder="Comma-separated">{{ p.exclude_keywords or '' }}</textarea>
 
       <button type="submit" class="secondary">Save {{ p.display_name }}</button>
     </form>

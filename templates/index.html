@@ -1,15 +1,22 @@
 {% extends "base.html" %}
 {% block body %}
-<header>
-  <h1>Movie night</h1>
-  <p class="sub">Whose pick tonight rotates: stepdad → mom → you. Tap the big button for a pick that matches that person&rsquo;s taste (and skips what you&rsquo;ve already seen).</p>
-</header>
+<div class="brand">
+  <div class="brand-mark" aria-hidden="true">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+  </div>
+  <div>
+    <h1>Movie Night</h1>
+    <p class="tagline">Rotation &middot; tastes &middot; no repeats</p>
+  </div>
+</div>
+
+<p class="sub" style="margin:-0.5rem 0 1rem; color:var(--muted); font-size:0.9rem;">Stepdad &rarr; mom &rarr; you. Tap below for tonight&rsquo;s pick. Open <a href="/sync">Sync</a> so everyone uses the same link.</p>
 
 {% set err = request.query_params.get('err') %}
 {% if err == 'no_audience' %}
   <p class="err">Choose at least one person for a blended pick.</p>
 {% elif err == 'no_movies' %}
-  <p class="err">No unseen matches right now. Try again, loosen tastes in Tastes, or clear some seen titles.</p>
+  <p class="err">No unseen matches right now. Try again, loosen tastes, or clear some seen titles.</p>
 {% elif err == 'bad_audience' %}
   <p class="err">Something went wrong with the selection.</p>
 {% elif err == 'no_rotation' %}
@@ -20,11 +27,11 @@
 
 <div class="card stack">
   <div>
-    <p style="margin:0 0 0.35rem; font-size:0.8rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.06em;">Tonight&rsquo;s turn</p>
+    <p class="label-caps">Tonight&rsquo;s turn</p>
     {% if tonight %}
-      <p style="margin:0; font-size:1.35rem; font-weight:700;">{{ tonight.display_name }} <span class="pill live">Pick</span></p>
+      <p class="picker-name">{{ tonight.display_name }} <span class="pill live">Pick</span></p>
       {% if next_picker %}
-        <p class="hint">Next up: {{ next_picker.display_name }}</p>
+        <p class="hint">Next: {{ next_picker.display_name }}</p>
       {% endif %}
     {% else %}
       <p class="sub" style="margin:0;">Add rotation profiles under Tastes.</p>
@@ -33,36 +40,36 @@
   <form method="post" action="/tonight">
     <button type="submit" {% if not tonight %}disabled{% endif %}>Suggest for tonight</button>
   </form>
-  <details style="margin:0;">
-    <summary class="sub" style="cursor:pointer; font-size:0.88rem;">Sync the calendar</summary>
-    <p class="hint">If &ldquo;tonight&rdquo; is wrong, set which calendar day counts as night 1 (stepdad). The app cycles from that date.</p>
+  <details>
+    <summary>Calendar sync</summary>
+    <p class="hint">Wrong night? Set the first day that counted as stepdad&rsquo;s turn.</p>
     <form method="post" action="/rotation/anchor" class="stack" style="margin-top:0.5rem;">
-      <label class="sub" for="anchor_date">Rotation start date</label>
+      <label class="sub" for="anchor_date">Rotation start</label>
       <input id="anchor_date" type="date" name="anchor_date" value="{{ anchor_date or '' }}" required />
-      <button type="submit" class="secondary">Save start date</button>
+      <button type="submit" class="secondary">Save</button>
     </form>
   </details>
 </div>
 
 <div class="card stack">
   <h2>Everyone&rsquo;s here</h2>
-  <p class="sub" style="margin:0;">Blend tastes when you all watch together.</p>
+  <p class="sub" style="margin:0;">Blend when you all watch together.</p>
   <form method="post" action="/suggest">
-    <div class="row" style="margin-bottom:0.5rem;">
+    <div class="row" style="margin-bottom:0.35rem;">
       {% for p in profiles %}
-        <label>
+        <label class="chip-check">
           <input type="checkbox" name="audience" value="{{ p.slug }}" />
           {{ p.display_name }}
         </label>
       {% endfor %}
     </div>
-    <button type="submit" class="secondary">Blended suggestion</button>
+    <button type="submit" class="secondary">Blended pick</button>
   </form>
 </div>
 
 <div class="card stack">
   <h2>Watchlist</h2>
-  <p class="sub" style="margin:0;">Save trailers you want to come back to. Tonight&rsquo;s picker sometimes pulls from here.</p>
+  <p class="sub" style="margin:0;">Saved for later; tonight sometimes pulls from here.</p>
   {% if watchlist %}
     <ul class="compact">
       {% for w in watchlist %}
@@ -73,13 +80,13 @@
       <button type="submit" class="ghost">Random from watchlist</button>
     </form>
   {% else %}
-    <p class="sub" style="margin:0;">Nothing saved yet &mdash; use &ldquo;Save to watchlist&rdquo; on a movie.</p>
+    <p class="sub" style="margin:0;">Save titles from a movie page.</p>
   {% endif %}
 </div>
 
 <div class="card">
   <h2>Seen <span class="pill">{{ seen_total }}</span></h2>
-  <p class="sub" style="margin:0 0 0.5rem;">Won&rsquo;t be suggested again.</p>
+  <p class="sub" style="margin:0 0 0.5rem;">Hidden from suggestions.</p>
   {% if seen_movies %}
     <ul class="compact">
       {% for s in seen_movies %}

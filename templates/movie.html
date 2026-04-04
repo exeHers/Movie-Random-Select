@@ -1,20 +1,31 @@
 {% extends "base.html" %}
+{% block sync %}{% endblock %}
 {% block title %}{{ m.title }} — Movie Night{% endblock %}
 {% block body %}
-<header>
+{% if backdrop_url %}
+<div class="movie-backdrop" style="--backdrop-img: url('{{ backdrop_url }}');">
+  <div class="movie-backdrop-inner">
+    <a href="/" class="back">&larr; Home</a>
+    <h1>{{ m.title }}{% if m.release_date %} <span class="pill">{{ m.release_date[:4] }}</span>{% endif %}</h1>
+    {% if m.tagline %}<p class="sub" style="font-style:italic; margin:0.5rem 0 0; opacity:0.9;">{{ m.tagline }}</p>{% endif %}
+  </div>
+</div>
+{% else %}
+<header class="page-head">
   <p class="sub" style="margin:0 0 0.25rem;"><a href="/">&larr; Home</a></p>
-  <h1 style="font-size:1.35rem;">{{ m.title }}{% if m.release_date %} <span class="pill">{{ m.release_date[:4] }}</span>{% endif %}</h1>
+  <h1>{{ m.title }}{% if m.release_date %} <span class="pill">{{ m.release_date[:4] }}</span>{% endif %}</h1>
   {% if m.tagline %}<p class="sub" style="font-style: italic; margin:0.25rem 0 0;">{{ m.tagline }}</p>{% endif %}
 </header>
+{% endif %}
 
 {% set src = request.query_params.get('from') or '' %}
 {% if request.query_params.get('err') == 'no_alt' %}
-  <p class="err">Couldn&rsquo;t find another unseen title with the same rules. Try again or adjust tastes.</p>
+  <p class="err">Couldn&rsquo;t find another unseen match. Try again or adjust tastes.</p>
 {% endif %}
 
 {% if trailer_url %}
-  <div class="card" style="padding:0.65rem;">
-    <p class="sub" style="margin:0 0 0.5rem 0.35rem; font-size:0.8rem;">Trailer</p>
+  <div class="card" style="padding:0.75rem;">
+    <p class="label-caps" style="margin-bottom:0.5rem;">Trailer</p>
     <div class="embed">
       <iframe src="{{ trailer_url }}" title="Trailer" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
     </div>
@@ -23,29 +34,31 @@
 
 <div class="card stack">
   {% if m.poster_path %}
-    <img
-      src="https://image.tmdb.org/t/p/w342{{ m.poster_path }}"
-      alt=""
-      width="342"
-      style="max-width: 100%; border-radius: 12px; border: 1px solid var(--border); margin: 0 auto; display: block;"
-    />
+    <div class="poster-frame">
+      <img
+        src="https://image.tmdb.org/t/p/w500{{ m.poster_path }}"
+        alt=""
+        width="500"
+        loading="lazy"
+      />
+    </div>
   {% endif %}
   <div>
     {% if runtime_display %}
-      <p class="sub" style="margin:0 0 0.35rem;">Runtime: <strong>{{ runtime_display }}</strong></p>
+      <p class="sub" style="margin:0 0 0.35rem;">Runtime <strong>{{ runtime_display }}</strong></p>
     {% endif %}
     {% if m.vote_average %}
-      <p class="sub" style="margin:0 0 0.5rem;">TMDB: <strong>{{ "%.1f"|format(m.vote_average) }}</strong> / 10</p>
+      <p class="sub" style="margin:0 0 0.5rem;">TMDB <strong>{{ "%.1f"|format(m.vote_average) }}</strong> / 10</p>
     {% endif %}
     <p style="margin:0;">{{ m.overview or "No overview." }}</p>
     {% if m.genres %}
       <p class="sub" style="margin: 0.75rem 0 0;">
-        {% for g in m.genres %}{{ g.name }}{% if not loop.last %}, {% endif %}{% endfor %}
+        {% for g in m.genres %}{{ g.name }}{% if not loop.last %} · {% endif %}{% endfor %}
       </p>
     {% endif %}
   </div>
-  <p style="margin:0;">
-    <a href="https://www.themoviedb.org/movie/{{ m.id }}" rel="noopener noreferrer">Open on TMDB</a>
+  <p class="link-row" style="margin:0;">
+    <a href="https://www.themoviedb.org/movie/{{ m.id }}" rel="noopener noreferrer">TMDB</a>
     {% if m.imdb_id %}
       &nbsp;&middot;&nbsp;<a href="https://www.imdb.com/title/{{ m.imdb_id }}/" rel="noopener noreferrer">IMDb</a>
     {% endif %}
@@ -55,11 +68,11 @@
 <div class="stack" style="margin-bottom: 0.5rem;">
   {% if seen %}
     <form method="post" action="/unseen/{{ m.id }}">
-      <button type="submit" class="secondary">Mark as not seen</button>
+      <button type="submit" class="secondary">Not seen</button>
     </form>
   {% else %}
     <form method="post" action="/seen/{{ m.id }}">
-      <button type="submit">Mark as seen</button>
+      <button type="submit">Mark seen</button>
     </form>
   {% endif %}
 
@@ -75,11 +88,11 @@
 
   {% if src == 'tonight' %}
     <form method="post" action="/shuffle/{{ m.id }}?from=tonight">
-      <button type="submit" class="secondary">Different pick (same person)</button>
+      <button type="submit" class="secondary">Try another (same night)</button>
     </form>
   {% elif src == 'custom' and blend_audience %}
     <form method="post" action="/shuffle/{{ m.id }}?from=custom{% for s in blend_audience %}&audience={{ s }}{% endfor %}">
-      <button type="submit" class="secondary">Different pick (same blend)</button>
+      <button type="submit" class="secondary">Try another (same blend)</button>
     </form>
   {% elif src == 'watchlist' %}
     <form method="post" action="/shuffle/{{ m.id }}?from=watchlist">
@@ -88,5 +101,5 @@
   {% endif %}
 </div>
 
-<p class="sub" style="margin-top:1rem;">{% if tonight and src == 'tonight' %}Picked for <strong>{{ tonight.display_name }}</strong>&rsquo;s night.{% elif src == 'watchlist' %}From your watchlist.{% elif src == 'custom' %}Blended pick.{% endif %} Data from <a href="https://www.themoviedb.org/" rel="noopener">TMDB</a>.</p>
+<p class="sub" style="margin-top:0.75rem;">{% if tonight and src == 'tonight' %}For <strong>{{ tonight.display_name }}</strong>&rsquo;s night.{% elif src == 'watchlist' %}From watchlist.{% elif src == 'custom' %}Blended.{% endif %} <a href="https://www.themoviedb.org/" rel="noopener">TMDB</a></p>
 {% endblock %}

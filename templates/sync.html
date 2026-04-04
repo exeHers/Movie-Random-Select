@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Sync — Movie Night{% endblock %}
+{% block body %}
+<header class="page-head">
+  <h1>Family sync</h1>
+  <p class="sub">One server, one database — every phone sees the same seen list, watchlist, rotation, and tastes.</p>
+</header>
+
+<div class="card stack">
+  <p class="card-title" style="margin:0;">Share this app</p>
+  <p class="hint" style="margin:0;">Send this link in a group chat. Everyone bookmarks it or adds to home screen.</p>
+  <input type="url" id="share-url" readonly value="{{ request.state.share_url }}/" style="font-size:0.85rem;" aria-label="App URL" />
+  <button type="button" class="secondary" id="copy-share">Copy app link</button>
+  <p class="hint" id="copy-toast" style="display:none; color:var(--mint);">Copied.</p>
+  {% if public_base_configured %}
+    <p class="hint" style="margin:0;">Using <code>PUBLIC_BASE_URL</code> so the link stays correct when opened from anywhere.</p>
+  {% endif %}
+</div>
+
+<div class="card stack">
+  <p class="card-title" style="margin:0;">How syncing works</p>
+  <ul class="compact" style="margin:0;">
+    <li><strong>Shared mode</strong> — the app is connected to PostgreSQL (<code>DATABASE_URL</code>). All devices use the same data.</li>
+    <li><strong>Local mode</strong> — no <code>DATABASE_URL</code>: data stays in a file on the machine running the server (fine for your laptop only).</li>
+  </ul>
+</div>
+
+<div class="card stack">
+  <p class="card-title" style="margin:0;">Host it (simple path)</p>
+  <ol class="compact" style="margin:0; padding-left:1.1rem; color:var(--muted); font-size:0.9rem;">
+    <li>Create a free Postgres DB (e.g. <a href="https://neon.tech" rel="noopener">Neon</a>, <a href="https://supabase.com" rel="noopener">Supabase</a>, or Railway).</li>
+    <li>Copy the connection string as <code>DATABASE_URL</code> (use <code>?sslmode=require</code> if the host asks).</li>
+    <li>Deploy this app (Fly.io, Railway, Render, a small VPS) with <code>TMDB_API_KEY</code> and <code>DATABASE_URL</code> set.</li>
+    <li>Set <code>PUBLIC_BASE_URL</code> to your live URL so &ldquo;Copy app link&rdquo; always matches.</li>
+  </ol>
+</div>
+
+<p class="hint"><a href="/">&larr; Back home</a></p>
+{% endblock %}
+{% block scripts %}
+<script>
+  document.getElementById("copy-share").addEventListener("click", async () => {
+    const el = document.getElementById("share-url");
+    const text = el.value;
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      el.select();
+      document.execCommand("copy");
+    }
+    const t = document.getElementById("copy-toast");
+    t.style.display = "block";
+    setTimeout(() => { t.style.display = "none"; }, 2000);
+  });
+</script>
+{% endblock %}

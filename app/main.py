@@ -12,6 +12,7 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.context import configured_public_base_url, share_url_for_request, sync_mode_key
 from app.db import SessionLocal, init_db
 from app.models import AppSetting, Profile, SeenMovie, WatchlistItem
 from app.suggest import (
@@ -37,6 +38,13 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Movie Night", lifespan=lifespan)
 app.mount("/static", StaticFiles(directory="static"), name="static")
+
+
+@app.middleware("http")
+async def attach_sync_context(request: Request, call_next):
+    request.state.sync_mode = sync_mode_key()
+    request.state.share_url = share_url_for_request(request)
+    return await call_next(request)
 
 
 async def get_session() -> AsyncGenerator[AsyncSession, None]:
@@ -93,6 +101,17 @@ async def _ensure_family_profiles(session: AsyncSession) -> None:
         row = next((r for r in rot_rows if r.slug == slug), None)
         if row is not None and row.rotation_order is None:
             row.rotation_order = i
+
+
+@app.get("/sync", response_class=HTMLResponse)
+async def sync_page(request: Request):
+    return templates.TemplateResponse(
+        "sync.html",
+        {
+            "request": request,
+            "public_base_configured": bool(configured_public_base_url()),
+        },
+    )
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -243,6 +262,9 @@ async def movie_page(request: Request, tmdb_id: int, session: SessionDep):
     ).scalar_one_or_none()
     tonight_p, rotation = await tonight_profile(session)
     blend_audience = request.query_params.getlist("audience")
+    backdrop_url = None
+    if detail.get("backdrop_path"):
+        backdrop_url = f"https://image.tmdb.org/t/p/w780{detail['backdrop_path']}"
 
     return templates.TemplateResponse(
         "movie.html",
@@ -256,6 +278,7 @@ async def movie_page(request: Request, tmdb_id: int, session: SessionDep):
             "tonight": tonight_p,
             "rotation": rotation,
             "blend_audience": blend_audience,
+            "backdrop_url": backdrop_url,
         },
     )
 

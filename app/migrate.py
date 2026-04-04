@@ -2,7 +2,10 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncEngine
 
 
-async def migrate_sqlite(engine: AsyncEngine) -> None:
+async def run_migrations(engine: AsyncEngine) -> None:
+    if not str(engine.url).startswith("sqlite"):
+        return
+
     async with engine.begin() as conn:
 
         def run(sync_conn):
