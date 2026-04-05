@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from typing import Optional
 
 from sqlalchemy import DateTime, Integer, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
@@ -51,5 +52,5 @@ class Profile(Base):
     genre_ids: Mapped[str] = mapped_column(String(256), default="")
     min_vote_average: Mapped[float] = mapped_column(default=7.0)
     min_vote_count: Mapped[int] = mapped_column(default=500)
-    rotation_order: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    rotation_order: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     exclude_keywords: Mapped[str] = mapped_column(String(512), default="")

@@ -46,6 +46,10 @@ Everything below uses **$0 tiers** (limits may change—check each provider) and
 
 These steps match **Render**’s free **Web Service**; other hosts use the same **environment variables** and a similar **start command**.
 
+### Python version on Render
+
+This repo includes **`runtime.txt`** with **`python-3.12.8`** so Render does **not** use a bleeding-edge Python (e.g. 3.14), which can break older SQLAlchemy builds. If you remove it, set the Python version in the Render dashboard instead.
+
 ### Connect GitHub
 
 1. Push this project to a **GitHub** repository (public or private).

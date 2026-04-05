@@ -162,6 +162,7 @@ app/           # FastAPI app, DB, suggestion logic, TMDB client
 templates/     # Jinja pages (home, movie, tastes, sync)
 static/        # CSS, PWA manifest, service worker, icon
 data/          # local SQLite when DATABASE_URL is not set (gitignored)
+runtime.txt    # Render: pin Python 3.12 (avoids 3.14 + SQLAlchemy issues)
 ```
 
 TMDB genre IDs for tastes: [genre movie list](https://developer.themoviedb.org/reference/genre-movie-list).
