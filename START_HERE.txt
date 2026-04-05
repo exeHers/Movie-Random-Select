@@ -1,0 +1,33 @@
+MOVIE NIGHT - QUICK START (Windows)
+===================================
+
+1) Install Python 3.10+ from https://www.python.org/downloads/
+   - 64-bit installer is fine.
+   - On the first screen, CHECK "Add python.exe to PATH", then Install.
+
+2) Double-click:  start.bat   (or run.bat - same thing)
+
+   - First time: it creates .venv, installs packages, creates .env.
+   - If Notepad opens: paste your TMDB API key next to TMDB_API_KEY=
+     Get a free key: https://www.themoviedb.org/settings/api
+   - Save Notepad, run start.bat again.
+
+3) Your browser should open to http://127.0.0.1:8000
+   - Top-right badge: "Healthy" = server + database OK.
+   - "Faulty" = database problem. "Offline" = page cannot reach the server.
+
+4) Optional one-time setup only: double-click setup.bat
+   (Usually you do not need this - start.bat runs setup automatically.)
+
+For hosting, environment variables, family sync, and troubleshooting,
+open README.md in this folder.
+
+If you see "No module named uvicorn": run start.bat again (it repairs
+the venv), or in Command Prompt:  .venv\Scripts\python.exe -m pip install -r requirements.txt
+
+EVERYONE'S PHONES IN SYNC (NO PC RUNNING)
+=========================================
+You need the app on the internet + a free PostgreSQL database.
+Step-by-step (free tiers): open DEPLOY-FREE.md in this folder.
+Short version: Neon or Supabase (DB) + Render or Fly.io (app) + set
+TMDB_API_KEY, DATABASE_URL, PUBLIC_BASE_URL on the host.

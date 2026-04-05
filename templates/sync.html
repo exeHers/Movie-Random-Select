@@ -28,11 +28,12 @@
 <div class="card stack">
   <p class="card-title" style="margin:0;">Host it (simple path)</p>
   <ol class="compact" style="margin:0; padding-left:1.1rem; color:var(--muted); font-size:0.9rem;">
-    <li>Create a free Postgres DB (e.g. <a href="https://neon.tech" rel="noopener">Neon</a>, <a href="https://supabase.com" rel="noopener">Supabase</a>, or Railway).</li>
-    <li>Copy the connection string as <code>DATABASE_URL</code> (use <code>?sslmode=require</code> if the host asks).</li>
-    <li>Deploy this app (Fly.io, Railway, Render, a small VPS) with <code>TMDB_API_KEY</code> and <code>DATABASE_URL</code> set.</li>
-    <li>Set <code>PUBLIC_BASE_URL</code> to your live URL so &ldquo;Copy app link&rdquo; always matches.</li>
+    <li>Create a free Postgres DB (e.g. <a href="https://neon.tech" rel="noopener">Neon</a> or <a href="https://supabase.com" rel="noopener">Supabase</a>).</li>
+    <li>Copy the connection string as <code>DATABASE_URL</code> (include <code>?sslmode=require</code> if the provider shows it).</li>
+    <li>Deploy this app (e.g. <a href="https://render.com" rel="noopener">Render</a>, <a href="https://fly.io" rel="noopener">Fly.io</a>, any VPS) with <code>TMDB_API_KEY</code> and <code>DATABASE_URL</code> set.</li>
+    <li>Set <code>PUBLIC_BASE_URL</code> to your live <strong>https://</strong> URL (no trailing slash) so &ldquo;Copy app link&rdquo; is correct.</li>
   </ol>
+  <p class="hint" style="margin:0.5rem 0 0;">In the project repo: <code>TUTORIAL.md</code> (local run, deploy, Android APK) and <code>DEPLOY-FREE.md</code> (free Postgres + hosting).</p>
 </div>
 
 <p class="hint"><a href="/">&larr; Back home</a></p>

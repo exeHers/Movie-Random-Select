@@ -2,14 +2,20 @@ import random
 from contextlib import asynccontextmanager
 from collections.abc import AsyncGenerator
 from datetime import date, datetime, timezone
+from pathlib import Path
 from typing import Annotated
 from urllib.parse import urlencode
 
+from dotenv import load_dotenv
+
+# Project root .env (Windows-friendly; no need to set env vars in CMD manually)
+load_dotenv(Path(__file__).resolve().parent.parent / ".env")
+
 from fastapi import Depends, FastAPI, Form, Request
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from sqlalchemy import delete, func, select
+from sqlalchemy import delete, func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.context import configured_public_base_url, share_url_for_request, sync_mode_key
@@ -53,6 +59,20 @@ async def get_session() -> AsyncGenerator[AsyncSession, None]:
 
 
 SessionDep = Annotated[AsyncSession, Depends(get_session)]
+
+
+@app.get("/health")
+async def health():
+    """Liveness + database connectivity for load balancers and monitors."""
+    try:
+        async with SessionLocal() as session:
+            await session.execute(text("SELECT 1"))
+    except Exception:
+        return JSONResponse(
+            status_code=503,
+            content={"status": "unhealthy", "database": "unreachable"},
+        )
+    return {"status": "ok", "database": "ok"}
 
 
 def _default_profiles() -> list[Profile]:

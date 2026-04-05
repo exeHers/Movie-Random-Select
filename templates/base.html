@@ -17,6 +17,10 @@
   {% block head %}{% endblock %}
 </head>
 <body>
+  <div class="health-pill health-checking" id="health-pill" role="status" aria-live="polite" title="Server and database status">
+    <span class="health-dot" aria-hidden="true"></span>
+    <span class="health-label">Checking</span>
+  </div>
   <div class="app-wrap">
     {% block sync %}
       {% if request.state.sync_mode == 'local' %}
@@ -51,6 +55,40 @@
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("/static/sw.js").catch(() => {});
     }
+    (function () {
+      var pill = document.getElementById("health-pill");
+      if (!pill) return;
+      var labelEl = pill.querySelector(".health-label");
+      function setState(cls, text) {
+        pill.className = "health-pill " + cls;
+        labelEl.textContent = text;
+        pill.setAttribute("title", "Server and database: " + text);
+      }
+      function check() {
+        setState("health-checking", "Checking");
+        fetch("/health", { cache: "no-store", credentials: "same-origin" })
+          .then(function (r) {
+            return r.json().then(function (j) {
+              return { ok: r.ok, j: j };
+            });
+          })
+          .then(function (x) {
+            if (x.ok && x.j && x.j.database === "ok") {
+              setState("health-ok", "Healthy");
+            } else {
+              setState("health-bad", "Faulty");
+            }
+          })
+          .catch(function () {
+            setState("health-offline", "Offline");
+          });
+      }
+      check();
+      setInterval(check, 45000);
+      document.addEventListener("visibilitychange", function () {
+        if (document.visibilityState === "visible") check();
+      });
+    })();
   </script>
   {% block scripts %}{% endblock %}
 </body>

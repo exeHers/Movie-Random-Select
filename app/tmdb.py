@@ -11,8 +11,8 @@ def _api_key() -> str:
     key = os.environ.get("TMDB_API_KEY", "").strip()
     if not key:
         raise RuntimeError(
-            "Set TMDB_API_KEY (free at https://www.themoviedb.org/settings/api). "
-            "Export it before running: export TMDB_API_KEY=your_key"
+            "Set TMDB_API_KEY in .env or your environment (free at "
+            "https://www.themoviedb.org/settings/api)."
         )
     return key
 

@@ -1,0 +1,11 @@
+.venv
+__pycache__
+*.py[cod]
+.git
+.gitignore
+.env
+*.sqlite
+data/*.sqlite
+*.md
+*.bat
+START_HERE.txt
