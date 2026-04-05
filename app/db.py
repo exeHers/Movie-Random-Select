@@ -9,6 +9,18 @@ from app.migrate import run_migrations
 
 _DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 
+# Query keys meant for libpq (psycopg2, JDBC, etc.). asyncpg passes the rest of
+# the URL query as connect() kwargs and errors on these (e.g. sslmode,
+# channel_binding).
+_LIBPQ_ONLY_QUERY_KEYS = frozenset(
+    {
+        "channel_binding",
+        "connect_timeout",
+        "options",
+        "target_session_attrs",
+    }
+)
+
 
 def _normalize_database_url(raw: str) -> tuple[str, dict]:
     """Return (sqlalchemy_url, connect_args) for create_async_engine."""
@@ -20,8 +32,7 @@ def _normalize_database_url(raw: str) -> tuple[str, dict]:
 
     connect_args: dict = {}
 
-    # Parse postgres URLs; asyncpg does not accept libpq ?sslmode= — it raises
-    # TypeError: connect() got an unexpected keyword argument 'sslmode'
+    # Parse postgres URLs; strip libpq-only ?params= so asyncpg won't see them.
     if raw.startswith("postgresql://") or raw.startswith("postgres://"):
         unified = raw.replace("postgres://", "postgresql://", 1)
         parsed = urlparse(unified)
@@ -29,8 +40,11 @@ def _normalize_database_url(raw: str) -> tuple[str, dict]:
         sslmode_val: str | None = None
         kept: list[tuple[str, str]] = []
         for key, val in pairs:
-            if key.lower() == "sslmode":
+            lk = key.lower()
+            if lk == "sslmode":
                 sslmode_val = (val or "require").lower()
+                continue
+            if lk in _LIBPQ_ONLY_QUERY_KEYS:
                 continue
             kept.append((key, val))
 
