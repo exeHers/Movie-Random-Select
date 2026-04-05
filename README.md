@@ -14,7 +14,7 @@
 
 | | |
 | :--- | :--- |
-| **Rotation** | Whose pick tonight cycles **stepdad → mom → you** (calendar-based; adjustable start date). |
+| **Rotation** | Whose pick tonight cycles **Dad → Mom → Son** (calendar-based; adjustable start date). |
 | **Tastes** | Per-person genres, score/vote thresholds, title keywords to skip. |
 | **Seen** | Mark watched titles so suggestions skip them. |
 | **Watchlist** | Save for later; random pick or bias toward list on “tonight.” |
@@ -120,7 +120,7 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
 ## Phone / APK
 
-This app is a **PWA** (no Android project in the repo). For **Add to Home screen**, **deployed HTTPS**, and **building an APK** with PWABuilder, follow **[TUTORIAL.md](./TUTORIAL.md)** (Parts 3–4).
+This app is a **PWA** (no Android project in the repo). For **Add to Home screen** and HTTPS deploy, see **[TUTORIAL.md](./TUTORIAL.md)**. For a **proper Android Studio + signed APK** (Trusted Web Activity, Digital Asset Links), use **[docs/BUILD-APK-ANDROID-STUDIO.md](./docs/BUILD-APK-ANDROID-STUDIO.md)**.
 
 ---
 
@@ -131,6 +131,8 @@ This app is a **PWA** (no Android project in the repo). For **Add to Home screen
 | `TMDB_API_KEY` | **Yes** | Movie metadata & discovery from TMDB. |
 | `DATABASE_URL` | No | **PostgreSQL** URL → one shared DB for every phone (family sync). If unset → SQLite in `data/movie_night.sqlite` (this machine only). |
 | `PUBLIC_BASE_URL` | No | e.g. `https://movies.yourdomain.com` — fixes **Copy app link** on the Sync page. |
+| `ANDROID_TWA_PACKAGE` | No | **Trusted Web Activity** / Android Studio APK: Android **Application ID** (must match Bubblewrap). |
+| `ANDROID_TWA_SHA256` | No | **TWA:** SHA-256 of your **release signing** cert (`keytool`). Serves `/.well-known/assetlinks.json`. See **docs/BUILD-APK-ANDROID-STUDIO.md**. |
 
 Postgres URLs can use `postgresql://` or `postgres://` (the app normalizes them for async SQLAlchemy).
 
@@ -152,6 +154,7 @@ See **[DEPLOY-FREE.md](./DEPLOY-FREE.md)** for a free-tier, step-by-step deploy.
 
 ```
 TUTORIAL.md    # Full walkthrough: local → online → Android APK / PWA
+docs/BUILD-APK-ANDROID-STUDIO.md  # Trusted Web Activity: Bubblewrap + Android Studio + asset links
 DEPLOY-FREE.md # Free PostgreSQL + HTTPS hosting (multi-device sync)
 Dockerfile     # Optional container deploy
 start.bat      # Windows: install-if-needed + run server + open browser

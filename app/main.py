@@ -18,6 +18,7 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy import delete, func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.asset_links import router as asset_links_router
 from app.context import configured_public_base_url, share_url_for_request, sync_mode_key
 from app.db import SessionLocal, init_db
 from app.models import AppSetting, Profile, SeenMovie, WatchlistItem
@@ -43,6 +44,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="Movie Night", lifespan=lifespan)
+app.include_router(asset_links_router)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
@@ -76,11 +78,12 @@ async def health():
 
 
 def _default_profiles() -> list[Profile]:
+    # Each person: TMDB genre IDs (see Tastes page). Edit per family in the app.
     return [
         Profile(
-            slug="stepdad",
-            display_name="Stepdad",
-            genre_ids="80,28,18",
+            slug="dad",
+            display_name="Dad",
+            genre_ids="80,28,18",  # Crime, Action, Drama — adjust in Tastes
             min_vote_average=7.0,
             min_vote_count=600,
             rotation_order=0,
@@ -89,16 +92,16 @@ def _default_profiles() -> list[Profile]:
         Profile(
             slug="mom",
             display_name="Mom",
-            genre_ids="10749,35,18",
+            genre_ids="10749,35,18",  # Romance, Comedy, Drama — adjust in Tastes
             min_vote_average=6.9,
             min_vote_count=700,
             rotation_order=1,
             exclude_keywords="",
         ),
         Profile(
-            slug="you",
-            display_name="You",
-            genre_ids="878,53,9648",
+            slug="son",
+            display_name="Son",
+            genre_ids="878,53,9648,16",  # Sci-Fi, Thriller, Mystery, Animation — adjust in Tastes
             min_vote_average=7.0,
             min_vote_count=400,
             rotation_order=2,

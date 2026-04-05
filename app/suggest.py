@@ -9,7 +9,7 @@ from app.models import AppSetting, Profile, SeenMovie, WatchlistItem
 from app.tmdb import discover_movies, movie_detail
 
 
-ROTATION_SLUGS = ("stepdad", "mom", "you")
+ROTATION_SLUGS = ("dad", "mom", "son")
 ANCHOR_KEY = "rotation_anchor_date"
 
 

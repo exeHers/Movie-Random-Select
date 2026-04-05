@@ -75,6 +75,8 @@ Render sets **`PORT`** automatically. Do **not** hard-code `8000` in production.
 
 **Why `PUBLIC_BASE_URL`?** So **Sync → Copy app link** always copies your real HTTPS URL, not an internal hostname.
 
+**Trusted Web Activity (Android Studio APK):** after you have a release keystore, set `ANDROID_TWA_PACKAGE` and `ANDROID_TWA_SHA256` so this app serves **`/.well-known/assetlinks.json`**. Full steps: **`docs/BUILD-APK-ANDROID-STUDIO.md`**.
+
 ### Health check (optional)
 
 In Render, set **Health Check Path** to `/health` so the dashboard knows when the app and database are OK.

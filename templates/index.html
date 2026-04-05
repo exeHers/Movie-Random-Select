@@ -10,7 +10,7 @@
   </div>
 </div>
 
-<p class="sub" style="margin:-0.5rem 0 1rem; color:var(--muted); font-size:0.9rem;">Stepdad &rarr; mom &rarr; you. Tap below for tonight&rsquo;s pick. Open <a href="/sync">Sync</a> so everyone uses the same link.</p>
+<p class="sub" style="margin:-0.5rem 0 1rem; color:var(--muted); font-size:0.9rem;">Dad &rarr; Mom &rarr; Son. Tap below for tonight&rsquo;s pick. Open <a href="/sync">Sync</a> so everyone uses the same link.</p>
 
 {% set err = request.query_params.get('err') %}
 {% if err == 'no_audience' %}
@@ -42,7 +42,7 @@
   </form>
   <details>
     <summary>Calendar sync</summary>
-    <p class="hint">Wrong night? Set the first day that counted as stepdad&rsquo;s turn.</p>
+    <p class="hint">Wrong night? Set the first day that counted as Dad&rsquo;s turn.</p>
     <form method="post" action="/rotation/anchor" class="stack" style="margin-top:0.5rem;">
       <label class="sub" for="anchor_date">Rotation start</label>
       <input id="anchor_date" type="date" name="anchor_date" value="{{ anchor_date or '' }}" required />

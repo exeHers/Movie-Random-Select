@@ -132,45 +132,44 @@ This is the **fastest** way to get a full-screen icon on Android—no Play Store
 
 ---
 
-## Part 4 — Build an APK from your live site (PWABuilder)
+## Part 4 — Build an APK from your live site
 
-This wraps your **HTTPS** Movie Night URL in a small **WebView** (Trusted Web Activity style) so you get an **.apk** or **.aab** to sideload or publish.
+You need a **public HTTPS** URL (Part 2). The app is still your website; the APK is a **Trusted Web Activity** wrapper.
 
 ### 4.1 Prerequisites
 
-- **Working HTTPS URL** from Part 2 (e.g. `https://movie-night-xxxx.onrender.com`).
-- In Chrome on a desktop, open that URL and confirm:
-  - The app loads.
-  - **Sync** page works and **Copy app link** uses HTTPS (set **`PUBLIC_BASE_URL`** if not).
+- **Working HTTPS URL** (e.g. `https://movie-random-select.onrender.com`).
+- **`PUBLIC_BASE_URL`** set on the host to that origin (no trailing slash).
+- In desktop Chrome, confirm the site loads and **Sync → Copy app link** uses **https**.
 
-### 4.2 Package with PWABuilder
+### 4.2 Android Studio + Bubblewrap (full, production-style)
 
-[PWABuilder](https://www.pwabuilder.com/) is a Microsoft project that packages PWAs for Android (and other stores).
+Use this when you want a **real Gradle project**, your own **keystore**, **Digital Asset Links** on your domain, and **Build → Generate Signed APK** inside **Android Studio**.
 
-1. Open **[pwabuilder.com](https://www.pwabuilder.com/)**.
-2. Enter your **full HTTPS site URL** (homepage), e.g. `https://movie-night-xxxx.onrender.com/`.
-3. Click **Start** / **Report**. Wait for the audit.
-4. If the **PWA score** flags issues:
-   - **Manifest / icons:** PWABuilder often offers **“Download”** or **suggested icon** PNGs if SVG-only icons cause issues on Android. Follow the prompts to add recommended sizes to **`static/`** and update **`manifest.webmanifest`** if they give you a snippet—then redeploy your site and re-run the audit.
-   - **Service worker:** This repo already registers **`/static/sw.js`**; ensure your deployed site loads it (same origin).
-5. Go to the **Android** or **Publish** section and choose **Android** (Play Store package or **sideload** / **APK** flow depending on the current UI).
-6. Fill in:
-   - **Package ID** (reverse domain, e.g. `com.yourfamily.movienight`).
-   - **App name** (e.g. `Movie Night`).
-   - **Signing:** For personal use, use **debug** or **new keystore** as PWABuilder describes; **store the keystore** if you ever plan to update the same app ID.
-7. **Download** the generated **APK** (or AAB for Play Console).
+**Follow the complete guide:** **[docs/BUILD-APK-ANDROID-STUDIO.md](./docs/BUILD-APK-ANDROID-STUDIO.md)**
 
-### 4.3 Install the APK on Android
+Summary of what that guide covers:
 
-1. On the phone, enable **Install unknown apps** for your browser or files app (path varies by Android version).
-2. Transfer the APK (email, Drive, USB) and open it.
-3. Tap **Install**.
+1. Install **Android Studio** + **Node.js**, then `npm i -g @bubblewrap/cli`.
+2. Run **`bubblewrap init`** against `https://YOUR_DOMAIN/static/manifest.webmanifest`.
+3. Create a **release keystore**; capture **SHA-256** with **`keytool -list -v`**.
+4. On Render, set **`ANDROID_TWA_PACKAGE`** (same Application ID as Bubblewrap) and **`ANDROID_TWA_SHA256`**; redeploy so **`/.well-known/assetlinks.json`** returns **200** (served by this repo’s `app/asset_links.py`).
+5. Open the generated project in **Android Studio**, wire **signing**, then **Build → Generate Signed App Bundle / APK**.
 
-**Updates:** When you change **only** the website, the WebView app may show new content automatically. If you change **package settings** or PWABuilder’s wrapper, you may need to rebuild a new APK.
+### 4.3 PWABuilder (faster, less control)
 
-### 4.4 Alternative: Bubblewrap (CLI)
+[PWABuilder](https://www.pwabuilder.com/) can produce an Android package in the browser. Good for quick tests; for **Android Studio** workflows, prefer §4.2.
 
-Google’s **[Bubblewrap](https://github.com/GoogleChromeLabs/bubblewrap)** builds a Trusted Web Activity project from your URL. It requires **Node.js** and the **Android SDK** (Android Studio). Use it if you want full control or CI; for most people **PWABuilder is simpler**.
+1. Open **[pwabuilder.com](https://www.pwabuilder.com/)** and enter your **https://** homepage.
+2. Fix any audit issues (often **PNG icons** if SVG is rejected); redeploy and re-run.
+3. Use the **Android** flow, set package name and signing, download **APK** or **AAB**.
+
+### 4.4 Install the APK on Android
+
+1. Enable **Install unknown apps** for the app you use to open the file.
+2. Transfer the APK and install.
+
+**Updates:** Site-only changes usually **do not** need a new APK. New signing keys or package ID require updating **`ANDROID_TWA_***`** env vars and rebuilding.
 
 ---
 
@@ -184,7 +183,7 @@ Google’s **[Bubblewrap](https://github.com/GoogleChromeLabs/bubblewrap)** buil
 | Env | **`PUBLIC_BASE_URL`** matches your real URL (no trailing slash) |
 | Sync | Two phones open the **same** link; see the same watchlist |
 | PWA | **Add to Home screen** works in Chrome |
-| APK | PWABuilder audit passes; APK installs and opens your URL |
+| APK | `assetlinks.json` 200; Android Studio release build installs; TWA full-screen |
 
 ---
 
@@ -195,6 +194,8 @@ Google’s **[Bubblewrap](https://github.com/GoogleChromeLabs/bubblewrap)** buil
 | `TMDB_API_KEY` | `.env` | Host dashboard |
 | `DATABASE_URL` | Optional (omit → SQLite) | **Required** for family sync (Postgres) |
 | `PUBLIC_BASE_URL` | Optional | **Recommended** (`https://your-domain`) |
+| `ANDROID_TWA_PACKAGE` | No | TWA / Android Studio: same as app **Application ID** |
+| `ANDROID_TWA_SHA256` | No | TWA: release keystore **SHA-256** (see **docs/BUILD-APK-ANDROID-STUDIO.md**) |
 
 ---
 
